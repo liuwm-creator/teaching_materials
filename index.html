@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中文量詞大冒險 - 件、個、盒、片、塊</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Zen Maru Gothic / Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0f9ff;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .font-rounded {
+            font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif;
+        }
+        /* Custom Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes pulse-bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        .animate-pulse-bounce {
+            animation: pulse-bounce 1.5s infinite;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 4px solid #ffffff;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .option-btn {
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .option-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+        }
+        .option-btn:active {
+            transform: translateY(2px) scale(0.98);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-sky-200 via-purple-100 to-pink-200 flex flex-col justify-between text-slate-800">
+
+    <!-- Top Header / Bar -->
+    <header class="w-full max-w-4xl mx-auto p-4 flex justify-between items-center z-10">
+        <!-- Logo / Title -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="goHome()">
+            <div class="bg-amber-400 text-white p-3 rounded-2xl shadow-lg border-2 border-amber-300 animate-float">
+                <i class="fa-solid fa-graduation-cap text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl md:text-3xl font-black font-rounded text-sky-700 tracking-wide drop-shadow-sm">量詞大冒險</h1>
+                <p class="text-xs md:text-sm text-sky-600 font-bold">快樂學中文：件・個・盒・片・塊</p>
+            </div>
+        </div>
+
+        <!-- Right Controls (Audio, Hints, Score) -->
+        <div class="flex items-center gap-3">
+            <button id="soundToggleBtn" onclick="toggleSound()" class="w-12 h-12 rounded-2xl bg-white shadow-md border-2 border-sky-300 text-sky-600 flex items-center justify-center text-xl hover:bg-sky-50 transition active:scale-95">
+                <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+            </button>
+            <button onclick="openHintModal()" class="px-4 h-12 rounded-2xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold shadow-md border-2 border-amber-300 flex items-center gap-2 transition active:scale-95">
+                <i class="fa-solid fa-lightbulb text-lg"></i>
+                <span class="hidden sm:inline">量詞小祕訣</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-4xl mx-auto px-4 py-2 flex-grow flex flex-col justify-center items-center">
+
+        <!-- SCREEN 1: Home / Level Selection Screen -->
+        <div id="homeScreen" class="w-full glass-card rounded-3xl p-6 md:p-8 text-center space-y-8 animate-fade-in">
+            <!-- Mascot Welcome -->
+            <div class="flex flex-col md:flex-row items-center justify-center gap-6">
+                <div class="w-36 h-36 relative animate-float">
+                    <!-- Mascot SVG (Cute Panda Teacher) -->
+                    <svg viewBox="0 0 200 200" class="w-full h-full filter drop-shadow-md">
+                        <!-- Ears -->
+                        <circle cx="50" cy="50" r="30" fill="#334155"/>
+                        <circle cx="150" cy="50" r="30" fill="#334155"/>
+                        <circle cx="50" cy="50" r="15" fill="#f87171"/>
+                        <circle cx="150" cy="50" r="15" fill="#f87171"/>
+                        <!-- Head -->
+                        <circle cx="100" cy="110" r="75" fill="#ffffff" stroke="#e2e8f0" stroke-width="4"/>
+                        <!-- Eye patches -->
+                        <ellipse cx="70" cy="105" rx="20" ry="25" fill="#334155" transform="rotate(-15 70 105)"/>
+                        <ellipse cx="130" cy="105" rx="20" ry="25" fill="#334155" transform="rotate(15 130 105)"/>
+                        <!-- Eyes -->
+                        <circle cx="73" cy="100" r="7" fill="#ffffff"/>
+                        <circle cx="75" cy="100" r="3" fill="#000000"/>
+                        <circle cx="127" cy="100" r="7" fill="#ffffff"/>
+                        <circle cx="125" cy="100" r="3" fill="#000000"/>
+                        <!-- Nose & Mouth -->
+                        <ellipse cx="100" cy="120" rx="10" ry="7" fill="#334155"/>
+                        <path d="M 90 130 Q 100 140 110 130" stroke="#334155" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <!-- Cheeks -->
+                        <circle cx="55" cy="125" r="12" fill="#fca5a5" opacity="0.6"/>
+                        <circle cx="145" cy="125" r="12" fill="#fca5a5" opacity="0.6"/>
+                        <!-- Glasses -->
+                        <circle cx="70" cy="105" r="24" stroke="#f59e0b" stroke-width="4" fill="none"/>
+                        <circle cx="130" cy="105" r="24" stroke="#f59e0b" stroke-width="4" fill="none"/>
+                        <line x1="94" y1="105" x2="106" y2="105" stroke="#f59e0b" stroke-width="4"/>
+                    </svg>
+                </div>
+                <div class="text-center md:text-left space-y-2">
+                    <div class="bg-amber-100 text-amber-900 border-2 border-amber-300 rounded-2xl p-4 inline-block relative max-w-md">
+                        <p class="text-lg md:text-xl font-bold font-rounded">哈囉！我是貓熊老師 🐼<br>準備好挑戰中文量詞關卡了嗎？</p>
+                        <!-- Speech bubble tail -->
+                        <div class="hidden md:block absolute -left-3 top-1/2 -translate-y-1/2 w-0 h-0 border-y-8 border-y-transparent border-r-8 border-r-amber-300"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Level Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+                <!-- Level 1 Button -->
+                <button onclick="startLevel(1)" class="group relative bg-gradient-to-br from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white rounded-3xl p-6 shadow-lg border-4 border-white transition transform hover:-translate-y-2 active:translate-y-0">
+                    <div class="absolute -top-3 -right-3 bg-yellow-400 text-amber-950 text-xs font-black px-3 py-1 rounded-full border-2 border-white shadow">
+                        第一關
+                    </div>
+                    <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl mb-3">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h3 class="text-2xl font-black font-rounded mb-1">基礎選擇題</h3>
+                    <p class="text-xs text-teal-100 font-medium">看圖選出正確的量詞：件、個、盒、片、塊</p>
+                </button>
+
+                <!-- Level 2 Button -->
+                <button onclick="startLevel(2)" class="group relative bg-gradient-to-br from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white rounded-3xl p-6 shadow-lg border-4 border-white transition transform hover:-translate-y-2 active:translate-y-0">
+                    <div class="absolute -top-3 -right-3 bg-yellow-400 text-amber-950 text-xs font-black px-3 py-1 rounded-full border-2 border-white shadow">
+                        第二關
+                    </div>
+                    <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl mb-3">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                    <h3 class="text-2xl font-black font-rounded mb-1">句子量詞填空</h3>
+                    <p class="text-xs text-sky-100 font-medium">閱讀生活情境句子，填入最合適的量詞</p>
+                </button>
+
+                <!-- Level 3 Button -->
+                <button onclick="startLevel(3)" class="group relative bg-gradient-to-br from-purple-400 to-indigo-500 hover:from-purple-500 hover:to-indigo-600 text-white rounded-3xl p-6 shadow-lg border-4 border-white transition transform hover:-translate-y-2 active:translate-y-0">
+                    <div class="absolute -top-3 -right-3 bg-yellow-400 text-amber-950 text-xs font-black px-3 py-1 rounded-full border-2 border-white shadow">
+                        第三關
+                    </div>
+                    <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl mb-3">
+                        <i class="fa-solid fa-boxes-packing"></i>
+                    </div>
+                    <h3 class="text-2xl font-black font-rounded mb-1">進階數量與量詞</h3>
+                    <p class="text-xs text-purple-100 font-medium">學習「半打 (6個)」、「一打 (12個)」與複合數量</p>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: Gameplay Container (Hidden initially) -->
+        <div id="gameScreen" class="w-full glass-card rounded-3xl p-5 md:p-8 hidden flex-col space-y-6">
+            
+            <!-- Game Top Status Bar -->
+            <div class="flex justify-between items-center border-b-2 border-slate-100 pb-4">
+                <!-- Level Badge -->
+                <div id="currentLevelBadge" class="bg-sky-500 text-white font-bold px-4 py-1.5 rounded-full text-sm shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-star"></i>
+                    <span id="levelTitleText">第一關：基礎選擇題</span>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="flex-1 max-w-xs mx-4">
+                    <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                        <span>進度</span>
+                        <span id="progressText">1 / 5</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
+                        <div id="progressBar" class="bg-gradient-to-r from-amber-400 to-emerald-400 h-full w-1/5 transition-all duration-300 rounded-full"></div>
+                    </div>
+                </div>
+
+                <!-- Score Counter -->
+                <div class="bg-amber-100 text-amber-800 font-black px-4 py-1.5 rounded-2xl border-2 border-amber-300 flex items-center gap-2 text-base md:text-lg">
+                    <i class="fa-solid fa-trophy text-amber-500"></i>
+                    <span id="scoreText">0</span>
+                </div>
+            </div>
+
+            <!-- Question Card Area -->
+            <div class="flex flex-col items-center justify-center space-y-4 py-2">
+                <!-- Mascot Mini Feedback -->
+                <div class="flex items-center gap-3 bg-sky-50 px-4 py-2 rounded-2xl border border-sky-200 text-sky-900 font-bold text-sm md:text-base w-full">
+                    <div class="w-8 h-8 rounded-full bg-white border border-sky-300 flex items-center justify-center shrink-0">🐼</div>
+                    <div id="mascotDialogue" class="truncate">請選出最正確的量詞喔！</div>
+                </div>
+
+                <!-- Image Illustration Area -->
+                <div id="illustrationContainer" class="w-48 h-48 md:w-56 md:h-56 bg-gradient-to-br from-amber-50 to-sky-50 rounded-3xl border-4 border-dashed border-sky-200 flex items-center justify-center p-4 relative shadow-inner">
+                    <!-- SVG graphics dynamically injected here -->
+                </div>
+
+                <!-- Question Prompt text -->
+                <div id="questionText" class="text-2xl md:text-3xl font-black font-rounded text-slate-800 text-center tracking-wide min-h-[50px] flex items-center justify-center">
+                    <!-- e.g. 一［ ］衣服 -->
+                </div>
+            </div>
+
+            <!-- Interactive Answer Options Area -->
+            <div id="optionsContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-2">
+                <!-- Buttons injected via JavaScript -->
+            </div>
+
+            <!-- Feedback Message Banner -->
+            <div id="feedbackBanner" class="hidden rounded-2xl p-4 text-center font-bold text-base transition-all">
+                <div id="feedbackContent"></div>
+            </div>
+
+            <!-- Next Button Container -->
+            <div class="flex justify-end pt-2">
+                <button id="nextBtn" onclick="nextQuestion()" class="hidden px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg rounded-2xl shadow-lg border-b-4 border-emerald-700 active:border-b-0 transition flex items-center gap-2">
+                    <span>下一題</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: Result / Summary Screen (Hidden initially) -->
+        <div id="resultScreen" class="w-full glass-card rounded-3xl p-6 md:p-10 hidden text-center space-y-6">
+            <div class="text-5xl md:text-6xl text-amber-400 animate-bounce">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            <h2 class="text-3xl md:text-4xl font-black font-rounded text-slate-800">闖關成功！太棒了！</h2>
+            
+            <!-- Stars Display -->
+            <div class="flex justify-center items-center gap-3 text-4xl md:text-5xl text-amber-400" id="starsContainer">
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+            </div>
+
+            <!-- Score Summary Card -->
+            <div class="bg-gradient-to-r from-sky-50 to-purple-50 p-6 rounded-2xl border-2 border-sky-100 max-w-md mx-auto space-y-3">
+                <div class="text-slate-600 font-bold">本次得分</div>
+                <div class="text-5xl font-black text-sky-600 font-rounded" id="finalScoreText">100</div>
+                <p id="resultComment" class="text-sm font-bold text-slate-700">你對量詞的掌握度非常好，繼續保持！</p>
+            </div>
+
+            <!-- Knowledge Recap Pill -->
+            <div class="text-left bg-white p-4 rounded-2xl border border-slate-200 text-xs sm:text-sm text-slate-600 space-y-1 max-w-lg mx-auto">
+                <div class="font-bold text-sky-700 text-sm mb-1"><i class="fa-solid fa-book-bookmark mr-1"></i>量詞小複習：</div>
+                <div>• <b>件</b>：衣服、事情（一件衣服）</div>
+                <div>• <b>個</b>：圓形或通用物品（一個蘋果、一個蛋糕）</div>
+                <div>• <b>盒</b>：盒裝物品（一盒牛奶、一盒蠟筆）</div>
+                <div>• <b>片</b>：薄平狀物品（一片麵包、一片樹葉）</div>
+                <div>• <b>塊</b>：塊狀或切塊物品（一塊西瓜、一塊蛋糕）</div>
+                <div>• <b>半打 / 一打</b>：6個稱為「半打」，12個稱為「一打」</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+                <button onclick="restartCurrentLevel()" class="px-6 py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-2xl shadow-md border-b-4 border-sky-700 active:border-b-0 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> 再玩一次
+                </button>
+                <button onclick="goHome()" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl shadow-md border-b-4 border-amber-700 active:border-b-0 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-house"></i> 回主選單
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal: Quantifier Concept Hints -->
+    <div id="hintModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border-4 border-amber-300 space-y-4 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeHintModal()" class="absolute top-4 right-4 w-10 h-10 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full font-bold flex items-center justify-center text-xl">
+                ✕
+            </button>
+
+            <div class="flex items-center gap-3 border-b-2 border-slate-100 pb-3">
+                <div class="bg-amber-400 text-white p-2.5 rounded-xl"><i class="fa-solid fa-lightbulb text-xl"></i></div>
+                <h3 class="text-2xl font-black font-rounded text-slate-800">量詞用法小秘訣</h3>
+            </div>
+
+            <div class="space-y-3 text-slate-700 text-sm md:text-base">
+                <div class="p-3 bg-rose-50 rounded-2xl border border-rose-200 flex items-start gap-3">
+                    <span class="text-2xl">👕</span>
+                    <div>
+                        <strong class="text-rose-700 font-black">件</strong>：常用於衣服、上衣、外套、大衣，或一件事情。
+                    </div>
+                </div>
+
+                <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200 flex items-start gap-3">
+                    <span class="text-2xl">🍎</span>
+                    <div>
+                        <strong class="text-amber-700 font-black">個</strong>：最常見的萬能量詞，多用於圓形或獨立個體（蘋果、球、人）。
+                    </div>
+                </div>
+
+                <div class="p-3 bg-blue-50 rounded-2xl border border-blue-200 flex items-start gap-3">
+                    <span class="text-2xl">📦</span>
+                    <div>
+                        <strong class="text-blue-700 font-black">盒</strong>：用於裝在盒子、紙盒或塑膠盒裡的物品（牛奶、餅乾、蠟筆）。
+                    </div>
+                </div>
+
+                <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-start gap-3">
+                    <span class="text-2xl">🍞</span>
+                    <div>
+                        <strong class="text-emerald-700 font-black">片</strong>：用於薄薄、平平的東西（吐司麵包、葉子、紙巾、薯片）。
+                    </div>
+                </div>
+
+                <div class="p-3 bg-purple-50 rounded-2xl border border-purple-200 flex items-start gap-3">
+                    <span class="text-2xl">🍰</span>
+                    <div>
+                        <strong class="text-purple-700 font-black">塊</strong>：用於切成塊狀或有厚度的東西（西瓜塊、蛋糕、肥皂、石頭）。
+                    </div>
+                </div>
+
+                <div class="p-3 bg-indigo-50 rounded-2xl border border-indigo-200 flex items-start gap-3">
+                    <span class="text-2xl">🥚</span>
+                    <div>
+                        <strong class="text-indigo-700 font-black">半打 & 一打</strong>：
+                        <br>• <b>半打</b> = <span class="text-indigo-600 font-bold">6個</span>（例如：半打雞蛋、半打甜甜圈）
+                        <br>• <b>一打</b> = <span class="text-indigo-600 font-bold">12個</span>（例如：一打蛋撻、一打鉛筆）
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeHintModal()" class="w-full py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-black rounded-2xl text-base shadow">
+                我知道了！開始挑戰
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-3 text-xs text-slate-500 font-medium">
+        中文量詞互動遊戲 ｜ 適合學童與中文初學者學習「件、個、盒、片、塊」
+    </footer>
+
+    <!-- JavaScript Game Logic & Web Audio API -->
+    <script>
+        // --- Web Audio API Synthesizer for SFX ---
+        let audioEnabled = true;
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function toggleSound() {
+            audioEnabled = !audioEnabled;
+            const icon = document.getElementById('soundIcon');
+            if (audioEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+            }
+        }
+
+        function playSFX(type) {
+            if (!audioEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+
+                if (type === 'correct') {
+                    // Happy High Chime Tone
+                    const osc1 = ctx.createOscillator();
+                    const osc2 = ctx.createOscillator();
+                    const gain = ctx.createGain();
+
+                    osc1.type = 'sine';
+                    osc2.type = 'triangle';
+
+                    osc1.frequency.setValueAtTime(523.25, now); // C5
+                    osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                    osc1.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+                    osc1.frequency.exponentialRampToValueAtTime(1046.50, now + 0.3); // C6
+
+                    osc2.frequency.setValueAtTime(261.63, now);
+                    osc2.frequency.exponentialRampToValueAtTime(523.25, now + 0.3);
+
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+                    osc1.connect(gain);
+                    osc2.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc1.start(now);
+                    osc2.start(now);
+                    osc1.stop(now + 0.4);
+                    osc2.stop(now + 0.4);
+
+                } else if (type === 'wrong') {
+                    // Low Buzz Error Tone
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.setValueAtTime(130, now + 0.15);
+
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+
+                } else if (type === 'fanfare') {
+                    // Victory Fanfare Sequence
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.value = freq;
+
+                        const startTime = now + idx * 0.12;
+                        gain.gain.setValueAtTime(0.3, startTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.25);
+
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+
+                        osc.start(startTime);
+                        osc.stop(startTime + 0.25);
+                    });
+                }
+            } catch (e) {
+                console.log("Audio playback error:", e);
+            }
+        }
+
+        // --- SVG Item Graphic Generator Helper ---
+        function getItemSVG(svgKey) {
+            const svgs = {
+                'clothes': `<svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow">
+                    <path d="M 30 20 L 42 30 C 45 32 55 32 58 30 L 70 20 L 90 35 L 78 48 L 75 45 L 75 85 L 25 85 L 25 45 L 22 48 L 10 35 Z" fill="#3b82f6" stroke="#1d4ed8" stroke-width="3"/>
+                    <circle cx="50" cy="45" r="3" fill="#ffffff"/>
+                    <circle cx="50" cy="58" r="3" fill="#ffffff"/>
+                    <circle cx="50" cy="71" r="3" fill="#ffffff"/>
+                </svg>`,
+
+                'apple': `<svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow">
+                    <path d="M 50 25 C 40 10 20 20 20 45 C 20 70 42 85 50 85 C 58 85 80 70 80 45 C 80 20 60 10 50 25 Z" fill="#ef4444" stroke="#b91c1c" stroke-width="3"/>
+                    <!-- Leaf -->
+                    <path d="M 50 25 Q 60 15 65 10 Q 55 18 50 25 Z" fill="#22c55e" stroke="#15803d" stroke-width="2"/>
+                    <path d="M 50 25 L 50 15" stroke="#78350f" stroke-width="4" stroke-linecap="round"/>
+                    <!-- Highlight -->
+                    <ellipse cx="35" cy="38" rx="6" ry="12" fill="#ffffff" opacity="0.4" transform="rotate(-20 35 38)"/>
+                </svg>`,
+
+                'milk': `<svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow">
+                    <!-- Milk Box -->
+                    <path d="M 30 35 L 50 20 L 70 35 L 70 85 L 30 85 Z" fill="#60a5fa" stroke="#1d4ed8" stroke-width="3"/>
+                    <path d="M 30 35 L 70 35" stroke="#1d4ed8" stroke-width="3"/>
+                    <path d="M 35 35 L 50 23 L 65 35" fill="#93c5fd"/>
+                    <!-- Label -->
+                    <rect x="38" y="48" width="24" height="28" rx="4" fill="#ffffff"/>
+                    <circle cx="50" cy="62" r="7" fill="#f59e0b"/>
+                </svg>`,
+
+                'toast': `<svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow">
+                    <!-- Bread Slice -->
+                    <path d="M 25 30 C 25 15 75 15 75 30 C 82 50 80 75 75 80 C 70 82 30 82 25 80 C 20 75 18 50 25 30 Z" fill="#fde047" stroke="#b45309" stroke-width="5"/>
+                    <path d="M 30 33 C 30 22 70 22 70 33 C 75 50 73 70 70 75 C 65 77 35 77 30 75 C 27 70 25 50 30 33 Z" fill="#fef08a"/>
+                </svg>`,
+
+                'watermelon': `<svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow">
+                    <!-- Watermelon slice -->
+                    <path d="M 15 30 Q 50 90 85 30 Z" fill="#ef4444" stroke="#b91c1c" stroke-width="3"/>
+                    <path d="M 12 28 Q 50 92 88 28" fill="none" stroke="#22c55e" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M 14 29 Q 50 90 86 29" fill="none" stroke="#ffffff" stroke-width="3"/>
+                    <!-- Seeds -->
+                    <circle cx="35" cy="45" r="2.5" fill="#000"/>
+                    <circle cx="50" cy="55" r="2.5" fill="#000"/>
+                    <circle cx="65" cy="45" r="2.5" fill="#000"/>
+                    <circle cx="50" cy="38" r="2.5" fill="#000"/>
+                </svg>`,
+
+                'cake': `<svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow">
+                    <!-- Slice of Cake -->
+                    <path d="M 20 65 L 50 30 L 80 65 L 75 80 L 25 80 Z" fill="#f472b6" stroke="#be185d" stroke-width="3"/>
+                    <path d="M 20 65 Q 50 75 80 65" stroke="#ffffff" stroke-width="6" fill="none"/>
+                    <path d="M 23 72 Q 50 82 77 72" stroke="#fbcfe8" stroke-width="4" fill="none"/>
+                    <!-- Cherry on top -->
+                    <circle cx="50" cy="26" r="8" fill="#dc2626"/>
+                    <path d="M 50 18 Q 58 10 62 14" stroke="#15803d" stroke-width="2" fill="none"/>
+                </svg>`,
+
+                'crayons': `<svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow">
+                    <!-- Crayon Box -->
+                    <rect x="25" y="30" width="50" height="55" rx="6" fill="#f59e0b" stroke="#b45309" stroke-width="3"/>
+                    <!-- Crayons peaking out -->
+                    <rect x="30" y="15" width="8" height="20" rx="2" fill="#ef4444"/>
+                    <polygon points="30,15 34,8 38,15" fill="#ef4444"/>
+                    <rect x="41" y="15" width="8" height="20" rx="2" fill="#3b82f6"/>
+                    <polygon points="41,15 45,8 49,15" fill="#3b82f6"/>
+                    <rect x="52" y="15" width="8" height="20" rx="2" fill="#22c55e"/>
+                    <polygon points="52,15 56,8 60,15" fill="#22c55e"/>
+                    <rect x="63" y="15" width="8" height="20" rx="2" fill="#a855f7"/>
+                    <polygon points="63,15 67,8 71,15" fill="#a855f7"/>
+                </svg>`,
+
+                'eggs': `<svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow">
+                    <!-- Egg carton with 6 eggs (Half Dozen) -->
+                    <rect x="15" y="35" width="70" height="45" rx="10" fill="#d97706" stroke="#78350f" stroke-width="3"/>
+                    <g fill="#fef3c7" stroke="#d97706" stroke-width="2">
+                        <ellipse cx="30" cy="45" rx="9" ry="12"/>
+                        <ellipse cx="50" cy="45" rx="9" ry="12"/>
+                        <ellipse cx="70" cy="45" rx="9" ry="12"/>
+                        <ellipse cx="30" cy="62" rx="9" ry="12"/>
+                        <ellipse cx="50" cy="62" rx="9" ry="12"/>
+                        <ellipse cx="70" cy="62" rx="9" ry="12"/>
+                    </g>
+                    <text x="50" y="28" font-size="12" font-weight="bold" fill="#78350f" text-anchor="middle">6 個蛋</text>
+                </svg>`,
+
+                'donuts': `<svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow">
+                    <!-- Box of 12 Donuts (1 Dozen Grid 4x3) -->
+                    <rect x="10" y="20" width="80" height="65" rx="8" fill="#fbcfe8" stroke="#db2777" stroke-width="3"/>
+                    <g fill="#f472b6" stroke="#be185d" stroke-width="1.5">
+                        <!-- Row 1 -->
+                        <circle cx="25" cy="33" r="7"/><circle cx="41" cy="33" r="7"/><circle cx="58" cy="33" r="7"/><circle cx="75" cy="33" r="7"/>
+                        <!-- Row 2 -->
+                        <circle cx="25" cy="52" r="7"/><circle cx="41" cy="52" r="7"/><circle cx="58" cy="52" r="7"/><circle cx="75" cy="52" r="7"/>
+                        <!-- Row 3 -->
+                        <circle cx="25" cy="70" r="7"/><circle cx="41" cy="70" r="7"/><circle cx="58" cy="70" r="7"/><circle cx="75" cy="70" r="7"/>
+                    </g>
+                    <!-- Inner hole dots -->
+                    <g fill="#ffffff">
+                        <circle cx="25" cy="33" r="2.5"/><circle cx="41" cy="33" r="2.5"/><circle cx="58" cy="33" r="2.5"/><circle cx="75" cy="33" r="2.5"/>
+                        <circle cx="25" cy="52" r="2.5"/><circle cx="41" cy="52" r="2.5"/><circle cx="58" cy="52" r="2.5"/><circle cx="75" cy="52" r="2.5"/>
+                        <circle cx="25" cy="70" r="2.5"/><circle cx="41" cy="70" r="2.5"/><circle cx="58" cy="70" r="2.5"/><circle cx="75" cy="70" r="2.5"/>
+                    </g>
+                    <text x="50" y="15" font-size="11" font-weight="bold" fill="#be185d" text-anchor="middle">12 個甜甜圈</text>
+                </svg>`,
+
+                'tissues': `<svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow">
+                    <!-- Sheet of tissue / Paper -->
+                    <path d="M 25 25 L 70 20 L 75 75 L 30 80 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+                    <path d="M 25 25 L 30 80" stroke="#94a3b8" stroke-width="2"/>
+                    <path d="M 35 35 Q 50 40 65 33" stroke="#e2e8f0" stroke-width="2" fill="none"/>
+                    <path d="M 37 55 Q 52 60 67 53" stroke="#e2e8f0" stroke-width="2" fill="none"/>
+                </svg>`
+            };
+            return svgs[svgKey] || svgs['apple'];
+        }
+
+        // --- Question Datasets ---
+        const levelData = {
+            1: [ // Level 1: Basic Multiple Choice
+                {
+                    item: "衣服",
+                    prefix: "一",
+                    suffix: "衣服",
+                    correct: "件",
+                    options: ["件", "個", "盒", "片", "塊"],
+                    svgKey: "clothes",
+                    explanation: "「件」常用於衣服或上衣喔！"
+                },
+                {
+                    item: "蘋果",
+                    prefix: "一",
+                    suffix: "蘋果",
+                    correct: "個",
+                    options: ["件", "個", "盒", "片", "塊"],
+                    svgKey: "apple",
+                    explanation: "「個」常用於圓形獨立的水果或物品！"
+                },
+                {
+                    item: "西瓜",
+                    prefix: "一",
+                    suffix: "西瓜",
+                    correct: "塊",
+                    options: ["件", "個", "盒", "片", "塊"],
+                    svgKey: "watermelon",
+                    explanation: "切開有厚度的水果會用「塊」！"
+                },
+                {
+                    item: "吐司",
+                    prefix: "一",
+                    suffix: "吐司麵包",
+                    correct: "片",
+                    options: ["件", "個", "盒", "片", "塊"],
+                    svgKey: "toast",
+                    explanation: "薄薄平平的麵包或樹葉用「片」！"
+                },
+                {
+                    item: "牛奶",
+                    prefix: "一",
+                    suffix: "牛奶",
+                    correct: "盒",
+                    options: ["件", "個", "盒", "片", "塊"],
+                    svgKey: "milk",
+                    explanation: "裝在紙盒裡的液體或物品用「盒」！"
+                }
+            ],
+
+            2: [ // Level 2: Sentence Fill-in-the-blank
+                {
+                    sentence: "媽媽在超市買了一［ ? ］牛奶。",
+                    prefix: "媽媽在超市買了一",
+                    suffix: "牛奶。",
+                    correct: "盒",
+                    options: ["件", "個", "盒", "片", "塊"],
+                    svgKey: "milk",
+                    explanation: "紙盒裝的牛奶要填「盒」。"
+                },
+                {
+                    sentence: "天氣變冷了，妹妹穿了一［ ? ］外套。",
+                    prefix: "天氣變冷了，妹妹穿了一",
+                    suffix: "外套。",
+                    correct: "件",
+                    options: ["件", "個", "盒", "片", "塊"],
+                    svgKey: "clothes",
+                    explanation: "外套是衣服類，用「件」。"
+                },
+                {
+                    sentence: "弟弟下午吃了一［ ? ］香甜的蛋糕。",
+                    prefix: "弟弟下午吃了一",
+                    suffix: "香甜的蛋糕。",
+                    correct: "塊",
+                    options: ["件", "個", "盒", "片", "塊"],
+                    svgKey: "cake",
+                    explanation: "切成塊狀的蛋糕用「塊」。"
+                },
+                {
+                    sentence: "早餐時，爸爸用了一［ ? ］紙巾擦手。",
+                    prefix: "早餐時，爸爸用了一",
+                    suffix: "紙巾擦手。",
+                    correct: "片",
+                    options: ["件", "個", "盒", "片", "塊"],
+                    svgKey: "tissues",
+                    explanation: "薄薄平平的紙巾用「片」。"
+                },
+                {
+                    sentence: "桌子上放著一［ ? ］紅紅的大蘋果。",
+                    prefix: "桌子上放著一",
+                    suffix: "紅紅的大蘋果。",
+                    correct: "個",
+                    options: ["件", "個", "盒", "片", "塊"],
+                    svgKey: "apple",
+                    explanation: "單個圓形的水果用「個」。"
+                }
+            ],
+
+            3: [ // Level 3: Advanced Quantities (Half Dozen, Dozen, Multiples)
+                {
+                    sentence: "媽媽買了［ ? ］雞蛋（共有 6 個）。",
+                    prefix: "媽媽買了",
+                    suffix: "雞蛋（共有 6 個）。",
+                    correct: "半打",
+                    options: ["半打", "一打", "兩塊", "三片", "一盒"],
+                    svgKey: "eggs",
+                    explanation: "6 個物品稱為「半打」喔！"
+                },
+                {
+                    sentence: "烘焙坊烤好了［ ? ］甜甜圈（共有 12 個）。",
+                    prefix: "烘焙坊烤好了",
+                    suffix: "甜甜圈（共有 12 個）。",
+                    correct: "一打",
+                    options: ["半打", "一打", "兩塊", "三片", "一盒"],
+                    svgKey: "donuts",
+                    explanation: "12 個物品稱為「一打」！"
+                },
+                {
+                    sentence: "桌上有［ ? ］蛋糕，給哥哥和妹妹吃。",
+                    prefix: "桌上有",
+                    suffix: "蛋糕，給哥哥和妹妹吃。",
+                    correct: "兩塊",
+                    options: ["半打", "一打", "兩塊", "三片", "半盒"],
+                    svgKey: "cake",
+                    explanation: "給兩個人吃，是「兩塊」蛋糕。"
+                },
+                {
+                    sentence: "小明買了一［ ? ］彩色畫筆。",
+                    prefix: "小明買了一",
+                    suffix: "彩色畫筆。",
+                    correct: "盒",
+                    options: ["件", "個", "盒", "片", "塊"],
+                    svgKey: "crayons",
+                    explanation: "裝在盒子裡的畫筆用「盒」。"
+                },
+                {
+                    sentence: "小狗烤了［ ? ］吐司作為早餐。",
+                    prefix: "小狗烤了",
+                    suffix: "吐司作為早餐。",
+                    correct: "三片",
+                    options: ["半打", "三片", "兩塊", "一打", "一件"],
+                    svgKey: "toast",
+                    explanation: "吐司麵包用量詞「片」。"
+                }
+            ]
+        };
+
+        // --- Game State Variables ---
+        let currentLevel = 1;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        // --- Navigation Functions ---
+        function goHome() {
+            document.getElementById('homeScreen').classList.remove('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('flex');
+            document.getElementById('resultScreen').classList.add('hidden');
+        }
+
+        function startLevel(levelNum) {
+            getAudioContext(); // Resume audio on user interaction
+            currentLevel = levelNum;
+            currentQuestionIndex = 0;
+            score = 0;
+            answered = false;
+
+            // Set UI Title based on level
+            const titles = {
+                1: "第一關：基礎選擇題",
+                2: "第二關：句子量詞填空",
+                3: "第三關：進階數量與量詞"
+            };
+            document.getElementById('levelTitleText').innerText = titles[levelNum];
+
+            // Switch Screen
+            document.getElementById('homeScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('gameScreen').classList.add('flex');
+
+            loadQuestion();
+        }
+
+        function restartCurrentLevel() {
+            startLevel(currentLevel);
+        }
+
+        // --- Render Question Function ---
+        function loadQuestion() {
+            answered = false;
+            const questions = levelData[currentLevel];
+            const q = questions[currentQuestionIndex];
+
+            // Update Header Stats
+            document.getElementById('scoreText').innerText = score;
+            document.getElementById('progressText').innerText = `${currentQuestionIndex + 1} / ${questions.length}`;
+            const progressPercent = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+            // Reset Mascot & Feedback
+            document.getElementById('mascotDialogue').innerText = "仔細看圖和句子，選擇正確的答案喔！";
+            const feedbackBanner = document.getElementById('feedbackBanner');
+            feedbackBanner.classList.add('hidden');
+            document.getElementById('nextBtn').classList.add('hidden');
+
+            // Render SVG Illustration
+            document.getElementById('illustrationContainer').innerHTML = getItemSVG(q.svgKey);
+
+            // Render Question Blank Text
+            const questionTextContainer = document.getElementById('questionText');
+            questionTextContainer.innerHTML = `
+                <span>${q.prefix}</span>
+                <span id="blankBox" class="inline-block mx-2 px-4 py-1 bg-amber-200 border-b-4 border-amber-400 text-amber-900 rounded-xl min-w-[60px] text-center shadow-inner">？</span>
+                <span>${q.suffix}</span>
+            `;
+
+            // Render Answer Buttons
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            // Shuffle options for variation
+            const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn bg-white hover:bg-sky-50 text-sky-800 font-black text-xl md:text-2xl py-3 md:py-4 px-2 rounded-2xl border-2 border-sky-200 shadow-md flex items-center justify-center';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        // --- Answer Verification ---
+        function checkAnswer(selectedOpt, btnElement) {
+            if (answered) return;
+            answered = true;
+
+            const questions = levelData[currentLevel];
+            const q = questions[currentQuestionIndex];
+            const isCorrect = (selectedOpt === q.correct);
+
+            // Fill blank box with user choice
+            const blankBox = document.getElementById('blankBox');
+            blankBox.innerText = selectedOpt;
+
+            const feedbackBanner = document.getElementById('feedbackBanner');
+            const feedbackContent = document.getElementById('feedbackContent');
+            const mascotDialogue = document.getElementById('mascotDialogue');
+
+            if (isCorrect) {
+                // Correct path
+                playSFX('correct');
+                score += 20;
+                document.getElementById('scoreText').innerText = score;
+
+                blankBox.className = 'inline-block mx-2 px-4 py-1 bg-emerald-400 text-white rounded-xl min-w-[60px] text-center shadow animate-bounce';
+                btnElement.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600');
+
+                mascotDialogue.innerText = "太棒了！答對囉！🎉";
+                
+                feedbackBanner.className = 'block bg-emerald-100 border-2 border-emerald-300 text-emerald-800 rounded-2xl p-4 text-center font-bold';
+                feedbackContent.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 text-xl mr-2"></i><b>答對了！</b> ${q.explanation}`;
+
+            } else {
+                // Wrong path
+                playSFX('wrong');
+
+                blankBox.className = 'inline-block mx-2 px-4 py-1 bg-rose-400 text-white rounded-xl min-w-[60px] text-center shadow';
+                btnElement.classList.add('bg-rose-500', 'text-white', 'border-rose-600');
+
+                mascotDialogue.innerText = "沒關係，我們再試試看！解答在下面喔 💡";
+
+                feedbackBanner.className = 'block bg-rose-100 border-2 border-rose-300 text-rose-800 rounded-2xl p-4 text-center font-bold';
+                feedbackContent.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 text-xl mr-2"></i><b>差一點點！</b> 正確答案是「<span class="text-rose-700 underline font-black">${q.correct}</span>」。${q.explanation}`;
+            }
+
+            // Show Next Button
+            document.getElementById('nextBtn').classList.remove('hidden');
+        }
+
+        // --- Next Question or Show Results ---
+        function nextQuestion() {
+            const questions = levelData[currentLevel];
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // --- Result Summary Screen ---
+        function showResults() {
+            playSFX('fanfare');
+
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('flex');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            document.getElementById('finalScoreText').innerText = score;
+
+            // Trigger Confetti
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+
+            // Rating Stars & Comments
+            const starsContainer = document.getElementById('starsContainer');
+            const resultComment = document.getElementById('resultComment');
+
+            if (score === 100) {
+                starsContainer.innerHTML = '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>';
+                resultComment.innerText = "完美！你簡直是量詞小達人！🌟";
+            } else if (score >= 60) {
+                starsContainer.innerHTML = '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>';
+                resultComment.innerText = "好棒！掌握得相當不錯，再接再厲！👍";
+            } else {
+                starsContainer.innerHTML = '<i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>';
+                resultComment.innerText = "繼續加油！點選「量詞小祕訣」複習會更厲害喔！💪";
+            }
+        }
+
+        // --- Hint Modal Logic ---
+        function openHintModal() {
+            document.getElementById('hintModal').classList.remove('hidden');
+        }
+
+        function closeHintModal() {
+            document.getElementById('hintModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
